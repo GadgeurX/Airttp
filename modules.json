@@ -1,0 +1,24 @@
+{
+  "modules" : {
+    "HttpHeaderParserModule": {
+      "addr": "127.0.0.1:5000",
+      "priority": "1"
+    } ,
+    "UrlParamModule": {
+      "addr": "127.0.0.1:5001",
+      "priority": "2"
+    } ,
+    "BodyParamModule": {
+      "addr": "127.0.0.1:5002",
+      "priority": "3"
+    },
+    "HttpGetModule": {
+     "addr": "127.0.0.1:5003",
+      "priority": "4"
+    },
+    "ResponceBuilderModule": {
+     "addr": "127.0.0.1:5004",
+      "priority": "5"
+    }
+  }
+}
