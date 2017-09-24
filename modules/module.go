@@ -24,21 +24,28 @@ type module struct {
 	addr string
 	client *rpc.Client
 	priority int
+	connected bool
 }
 
 func NewModule(name string, addr string, priority int) *module {
 	module := new(module)
+	module.connected = false
 	module.name = name
 	module.addr = addr
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		logger.GetInstance().Error("Error connection to module \"" + module.name + "\"")
-		return module
-	}
-	logger.GetInstance().Notice("Connected to module \"" + module.name + "\" priority " + strconv.Itoa(priority))
 	module.priority = priority
-	module.client = rpc.NewClient(conn)
+	module.Connect()
 	return module
+}
+
+func (mod *module) Connect() {
+	conn, err := net.Dial("tcp", mod.addr)
+	if err != nil {
+		logger.GetInstance().Error("Error connection to module \"" + mod.name + "\"")
+	} else {
+		logger.GetInstance().Notice("Connected to module \"" + mod.name + "\" priority " + strconv.Itoa(mod.priority))
+		mod.connected = true
+		mod.client = rpc.NewClient(conn)
+	}
 }
 
 func (mod *module) execRequest(params ModuleParams) ModuleParams {
@@ -49,6 +56,8 @@ func (mod *module) execRequest(params ModuleParams) ModuleParams {
 	err := mod.client.Call("Http.Module", params, &result)
 	if err != nil {
 		logger.GetInstance().Error("Error call module \"" + mod.name + "\" : " + err.Error())
+		mod.connected = false
+		mod.client = nil
 		return params
 	}
 	return result

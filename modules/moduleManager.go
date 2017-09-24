@@ -12,7 +12,7 @@ import (
 var m_ModuleManager *moduleManager = nil
 
 type moduleManager struct {
-	modules []module
+	modules []*module
 	maxPriority int
 }
 
@@ -29,10 +29,22 @@ func (manager *moduleManager) LoadModules() {
 			logger.GetInstance().Error("Module moduleName invalid priority \"" + moduleInfo["priority"] + "\"")
 		} else {
 			logger.GetInstance().Info("Load module \"" + moduleName + "\" at \"" + moduleInfo["addr"] + "\" and priority " + moduleInfo["priority"])
-			manager.modules = append(manager.modules, *NewModule(moduleName, moduleInfo["addr"], priority))
+			manager.modules = append(manager.modules, NewModule(moduleName, moduleInfo["addr"], priority))
 		}
 	}
 	manager.maxPriority = manager.SetMaxPriority()
+	go manager.CheckModulesConnection()
+}
+
+func (manager *moduleManager) CheckModulesConnection() {
+	for {
+		time.Sleep(10 * time.Second)
+		for _, moduleElem := range manager.modules {
+			if (!moduleElem.connected) {
+				moduleElem.Connect()
+			}
+		}
+	}
 }
 
 func (manager *moduleManager) SetMaxPriority() int {
