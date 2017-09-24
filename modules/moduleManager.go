@@ -25,11 +25,12 @@ func (manager *moduleManager) LoadModules() {
 	modulesList := config.GetConfigInstance().GetModulesList()
 	for moduleName,moduleInfo := range modulesList {
 		priority, err := strconv.Atoi(moduleInfo["priority"])
-		if (err != nil) {
-			logger.GetInstance().Error("Module moduleName invalid priority \"" + moduleInfo["priority"] + "\"")
+		require, err2 := strconv.ParseBool(moduleInfo["require"])
+		if (err != nil || err2 != nil) {
+			logger.GetInstance().Error("Module moduleName invalid propriety")
 		} else {
 			logger.GetInstance().Info("Load module \"" + moduleName + "\" at \"" + moduleInfo["addr"] + "\" and priority " + moduleInfo["priority"])
-			manager.modules = append(manager.modules, NewModule(moduleName, moduleInfo["addr"], priority))
+			manager.modules = append(manager.modules, NewModule(moduleName, moduleInfo["addr"], priority, require))
 		}
 	}
 	manager.maxPriority = manager.SetMaxPriority()
@@ -73,7 +74,6 @@ func (manager *moduleManager) ExecRequest(conn net.Conn, sess *http.Session, req
 		}
 		prio++
 	}
-
 	elapsed := time.Since(start)
 	logger.GetInstance().Info(params.Req.Method + " " + params.Req.Uri + " " + elapsed.String())
 	conn.Write(params.Res.Raw)

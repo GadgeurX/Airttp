@@ -2,23 +2,28 @@
   "modules" : {
     "HttpHeaderParserModule": {
       "addr": "127.0.0.1:5000",
-      "priority": "1"
-    } ,
+      "priority": "1",
+      "require": "true"
+    },
     "UrlParamModule": {
       "addr": "127.0.0.1:5001",
-      "priority": "2"
-    } ,
+      "priority": "2",
+      "require": "false"
+    },
     "BodyParamModule": {
       "addr": "127.0.0.1:5002",
-      "priority": "3"
+      "priority": "3",
+      "require": "false"
     },
     "HttpGetModule": {
      "addr": "127.0.0.1:5003",
-      "priority": "4"
+      "priority": "4",
+      "require": "true"
     },
     "ResponceBuilderModule": {
      "addr": "127.0.0.1:5004",
-      "priority": "5"
+      "priority": "5",
+      "require": "true"
     }
   }
 }

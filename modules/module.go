@@ -25,14 +25,16 @@ type module struct {
 	client *rpc.Client
 	priority int
 	connected bool
+	require bool
 }
 
-func NewModule(name string, addr string, priority int) *module {
+func NewModule(name string, addr string, priority int, require bool) *module {
 	module := new(module)
 	module.connected = false
 	module.name = name
 	module.addr = addr
 	module.priority = priority
+	module.require = require
 	module.Connect()
 	return module
 }
@@ -50,6 +52,9 @@ func (mod *module) Connect() {
 
 func (mod *module) execRequest(params ModuleParams) ModuleParams {
 	if (mod.client == nil) {
+		if (mod.require) {
+			handleMissingRequireModule(&params)
+		}
 		return params
 	}
 	var result ModuleParams
@@ -58,7 +63,22 @@ func (mod *module) execRequest(params ModuleParams) ModuleParams {
 		logger.GetInstance().Error("Error call module \"" + mod.name + "\" : " + err.Error())
 		mod.connected = false
 		mod.client = nil
+		handleMissingRequireModule(&params)
 		return params
 	}
 	return result
+}
+
+func handleMissingRequireModule(params *ModuleParams) {
+	params.Res.Body = []byte("Error missing module")
+	params.Res.Headers["Content-Length"] = strconv.Itoa(len(params.Res.Body))
+	params.Res.Code = 500
+	params.Res.Message = "Server Error"
+
+	params.Res.Raw = []byte("HTTP/1.1 " + strconv.Itoa(params.Res.Code) + " " + params.Res.Message + "\r\n")
+	for key, value := range params.Res.Headers {
+		params.Res.Raw = append(params.Res.Raw[:], []byte(key + ": " + value + "\r\n")[:]...)
+	}
+	params.Res.Raw = append(params.Res.Raw[:], []byte("\r\n")[:]...)
+	params.Res.Raw = append(params.Res.Raw[:], params.Res.Body[:]...)
 }
