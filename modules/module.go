@@ -72,8 +72,8 @@ func (mod *module) execRequest(params ModuleParams) ModuleParams {
 func handleMissingRequireModule(params *ModuleParams) {
 	params.Res.Body = []byte("Error missing module")
 	params.Res.Headers["Content-Length"] = strconv.Itoa(len(params.Res.Body))
-	params.Res.Code = 500
-	params.Res.Message = "Server Error"
+	params.Res.Code = http.Values["SERVER_ERROR"].Code
+	params.Res.Message = http.Values["SERVER_ERROR"].Message
 
 	params.Res.Raw = []byte("HTTP/1.1 " + strconv.Itoa(params.Res.Code) + " " + params.Res.Message + "\r\n")
 	for key, value := range params.Res.Headers {

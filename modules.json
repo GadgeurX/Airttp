@@ -22,6 +22,11 @@
     },
     "ResponceBuilderModule": {
      "addr": "127.0.0.1:5004",
+      "priority": "6",
+      "require": "true"
+    },
+    "PhpModule": {
+      "addr": "127.0.0.1:5005",
       "priority": "5",
       "require": "true"
     }
